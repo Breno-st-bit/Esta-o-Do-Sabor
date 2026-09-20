@@ -713,14 +713,77 @@
     html{ scroll-behavior: auto; }
     .btn, .cart-bar, .add-btn, .cart-finish-btn{ transition: none; }
   }
+
+/* ---------- MICROINTERAÇÕES PREMIUM ---------- */
+.menu-row,.ticket,.btn,.add-btn,.qty-ctrl,.carousel-arrow,.cart-finish-btn{
+  will-change:transform;
+}
+.menu-row{
+  transition:transform .18s ease,background-color .18s ease,padding-left .18s ease;
+  border-radius:6px;
+}
+.menu-row:hover{
+  transform:translateX(4px);
+  background:rgba(232,149,30,.055);
+  padding-left:8px;
+}
+.add-btn{
+  transition:transform .16s ease,background .16s ease,box-shadow .16s ease;
+}
+.add-btn:hover{
+  transform:translateY(-2px) scale(1.02);
+  box-shadow:0 7px 16px rgba(43,27,18,.18);
+}
+.add-btn:active,.qty-ctrl button:active,.cart-finish-btn:active{
+  transform:scale(.94);
+}
+.cart-bar.show{animation:cartBarIn .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes cartBarIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.cart-finish-btn{box-shadow:0 7px 18px rgba(79,143,91,.25)}
+.cart-bump{animation:cartBump .36s ease}
+@keyframes cartBump{
+  0%{transform:scale(1)}35%{transform:scale(1.08)}
+  70%{transform:scale(.96)}100%{transform:scale(1)}
+}
+.product-added{animation:productAdded .42s ease}
+@keyframes productAdded{
+  0%{background:rgba(79,143,91,.18)}100%{background:transparent}
+}
+.toast{
+  position:fixed;left:50%;bottom:96px;z-index:80;
+  transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  background:var(--ink);color:var(--cream);
+  border:1px solid var(--board-line);padding:11px 15px;border-radius:5px;
+  font-size:12px;box-shadow:0 12px 30px rgba(0,0,0,.25);
+  transition:opacity .22s ease,transform .22s ease;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.status-dot.closed{background:var(--red);box-shadow:0 0 8px var(--red)}
+.status.closed{color:var(--gold)}
+.status-extra{
+  display:block;margin-top:4px;padding-left:16px;
+  font-size:11px;color:rgba(255,246,232,.65);
+}
+@media (prefers-reduced-motion:reduce){
+  .menu-row,.add-btn,.cart-bar.show,.cart-bump,.product-added,.toast,
+  .btn,.cart-finish-btn,.qty-ctrl button{
+    animation:none!important;transition:none!important;transform:none!important;
+  }
+}
+
 </style>
 </head>
 <body>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <header class="board">
   <div class="wrap">
     <div class="board-top">
-      <span class="status"><span class="status-dot"></span>ABERTO AGORA · SALGADOS FRITOS NA HORA</span>
+      <span class="status" id="storeStatus">
+  <span class="status-dot" id="statusDot"></span>
+  <span id="statusText">VERIFICANDO HORÁRIO...</span>
+  <span class="status-extra" id="statusExtra"></span>
+</span>
       <span>PLATAFORMA ÚNICA · PEDIDOS PELO WHATSAPP</span>
     </div>
 
@@ -1192,6 +1255,9 @@
         cart[name] = { price: price, qty: 1 };
         renderControl(container, name, price);
         updateCartBar();
+        animateCart();
+        animateProduct(container.closest(".menu-row") || container.closest(".ticket"));
+        showToast(name + " adicionado ao pedido");
       });
       container.appendChild(addBtn);
     } else {
@@ -1223,6 +1289,7 @@
         cart[name].qty += 1;
         renderControl(container, name, price);
         updateCartBar();
+        animateCart();
       });
 
       wrap.appendChild(minusBtn);
@@ -1255,6 +1322,88 @@
     lines.push("");
     lines.push("Total: " + formatBRL(total));
     return lines.join("\n");
+  }
+
+
+  // ---------- STATUS AUTOMÁTICO ----------
+  // Horários editáveis da loja: [abertura, fechamento].
+  var STORE_HOURS = {
+    0: null,
+    1: ["10:00","22:00"],
+    2: ["10:00","22:00"],
+    3: ["10:00","22:00"],
+    4: ["10:00","22:00"],
+    5: ["10:00","23:00"],
+    6: ["10:00","23:00"]
+  };
+
+  function timeToMinutes(hm){
+    var p=hm.split(":");
+    return parseInt(p[0],10)*60+parseInt(p[1],10);
+  }
+
+  function updateStoreStatus(){
+    var status=document.getElementById("storeStatus");
+    var dot=document.getElementById("statusDot");
+    var label=document.getElementById("statusText");
+    var extra=document.getElementById("statusExtra");
+    if(!status||!dot||!label||!extra)return;
+
+    var now=new Date(), day=now.getDay();
+    var schedule=STORE_HOURS[day];
+    var minutes=now.getHours()*60+now.getMinutes();
+
+    status.classList.remove("closed");
+    dot.classList.remove("closed");
+
+    if(!schedule){
+      label.textContent="FECHADO AGORA";
+      extra.textContent="Voltamos no próximo dia de atendimento";
+      status.classList.add("closed");
+      dot.classList.add("closed");
+      return;
+    }
+
+    var open=timeToMinutes(schedule[0]), close=timeToMinutes(schedule[1]);
+
+    if(minutes>=open && minutes<close){
+      label.textContent="ABERTO AGORA · SALGADOS FRITOS NA HORA";
+      extra.textContent="Até "+schedule[1];
+    }else{
+      label.textContent="FECHADO AGORA";
+      extra.textContent=minutes<open
+        ?"Abre hoje às "+schedule[0]
+        :"Encerrado às "+schedule[1];
+      status.classList.add("closed");
+      dot.classList.add("closed");
+    }
+  }
+
+  // ---------- MICROINTERAÇÕES ----------
+  function showToast(message){
+    var toast=document.getElementById("toast");
+    if(!toast)return;
+    toast.textContent=message;
+    toast.classList.add("show");
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer=setTimeout(function(){
+      toast.classList.remove("show");
+    },1800);
+  }
+
+  function animateCart(){
+    var bar=document.getElementById("cartBar");
+    if(!bar)return;
+    bar.classList.remove("cart-bump");
+    void bar.offsetWidth;
+    bar.classList.add("cart-bump");
+  }
+
+  function animateProduct(row){
+    if(!row)return;
+    row.classList.remove("product-added");
+    void row.offsetWidth;
+    row.classList.add("product-added");
   }
 
   function finishOrder(){
@@ -1343,6 +1492,8 @@
   document.addEventListener("DOMContentLoaded", function(){
     initProducts();
     updateCartBar();
+    updateStoreStatus();
+    setInterval(updateStoreStatus, 60000);
     initCarousel();
     var finishBtn = document.getElementById("cartFinishBtn");
     if (finishBtn){
@@ -1354,3 +1505,4 @@
 
 </body>
 </html>
+```
