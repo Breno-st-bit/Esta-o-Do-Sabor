@@ -771,6 +771,224 @@
   }
 }
 
+/* ---------- MODAL DE CHECKOUT ---------- */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(36,23,18,0.55);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  padding: 0;
+}
+.modal-overlay.show{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card{
+  background: var(--cream);
+  width: 100%;
+  max-width: 480px;
+  border-radius: 14px 14px 0 0;
+  padding: 26px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+  max-height: 88vh;
+  overflow-y: auto;
+  transform: translateY(24px);
+  transition: transform 0.25s cubic-bezier(.2,.8,.2,1);
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.3);
+}
+.modal-overlay.show .modal-card{
+  transform: translateY(0);
+}
+
+@media (min-width: 640px){
+  .modal-overlay{ align-items: center; }
+  .modal-card{
+    border-radius: 10px;
+    transform: translateY(12px) scale(0.98);
+  }
+  .modal-overlay.show .modal-card{
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.modal-head h3{
+  font-size: 21px;
+}
+
+.modal-close{
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.6;
+}
+.modal-close:hover{ opacity: 1; }
+
+.modal-section{
+  margin-bottom: 20px;
+}
+
+.modal-label{
+  font-size: 12px;
+  color: var(--amber-dim);
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+  display:block;
+}
+
+.option-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.option-pill{
+  position: relative;
+}
+
+.option-pill input{
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.option-pill label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 6px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  padding: 12px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  text-align: center;
+}
+
+.option-pill input:checked + label{
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.option-pill input:focus-visible + label{
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
+}
+
+.field-input, .field-textarea{
+  width: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.field-input:focus, .field-textarea:focus{
+  outline: none;
+  border-color: var(--ink);
+}
+
+.address-fields{
+  display:none;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.address-fields.show{ display: flex; }
+
+.field-hint{
+  font-size: 11px;
+  color: rgba(43,27,18,0.5);
+  margin-top: -4px;
+}
+
+.modal-summary{
+  background: var(--board);
+  color: var(--cream);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+
+.modal-summary-row{
+  display:flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: rgba(255,246,232,0.75);
+  padding: 3px 0;
+}
+
+.modal-summary-row.total{
+  border-top: 1px dashed var(--board-line);
+  margin-top: 8px;
+  padding-top: 10px;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--gold);
+}
+
+.modal-error{
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 600;
+  margin-top: -6px;
+  margin-bottom: 14px;
+  display: none;
+}
+.modal-error.show{ display: block; }
+
+.modal-submit{
+  width: 100%;
+  background: var(--green);
+  color: var(--cream);
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  padding: 15px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 8px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.modal-submit:hover{ background: #427a4c; transform: translateY(-1px); }
+.modal-submit svg{ width: 16px; height: 16px; }
+
+@media (prefers-reduced-motion: reduce){
+  .modal-overlay, .modal-card, .modal-submit, .option-pill label{
+    transition: none !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1199,6 +1417,69 @@
   </div>
 </div>
 
+<!-- ---------- MODAL DE CHECKOUT (PAGAMENTO + ENTREGA) ---------- -->
+<div class="modal-overlay" id="checkoutOverlay" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+    <div class="modal-head">
+      <h3 id="checkoutTitle">Só falta isso 🙌</h3>
+      <button class="modal-close" id="checkoutClose" type="button" aria-label="Fechar">&times;</button>
+    </div>
+
+    <div class="modal-summary" id="checkoutSummary">
+      <!-- preenchido via JS -->
+    </div>
+
+    <form id="checkoutForm">
+      <div class="modal-section">
+        <span class="modal-label">COMO VOCÊ QUER RECEBER?</span>
+        <div class="option-grid" id="deliveryOptions">
+          <div class="option-pill">
+            <input type="radio" name="deliveryType" id="deliveryEntrega" value="Entrega" checked>
+            <label for="deliveryEntrega">🛵 Entrega</label>
+          </div>
+          <div class="option-pill">
+            <input type="radio" name="deliveryType" id="deliveryRetirada" value="Retirada no local">
+            <label for="deliveryRetirada">🏠 Retirar no local</label>
+          </div>
+        </div>
+
+        <div class="address-fields show" id="addressFields">
+          <textarea class="field-textarea" id="addressInput" rows="2" placeholder="Rua, número, bairro, complemento..."></textarea>
+          <input class="field-input" id="referenceInput" type="text" placeholder="Ponto de referência (opcional)">
+        </div>
+        <div class="modal-error" id="addressError">Digite o endereço de entrega pra continuar.</div>
+      </div>
+
+      <div class="modal-section">
+        <span class="modal-label">FORMA DE PAGAMENTO</span>
+        <div class="option-grid" id="paymentOptions">
+          <div class="option-pill">
+            <input type="radio" name="paymentType" id="payPix" value="Pix" checked>
+            <label for="payPix">Pix</label>
+          </div>
+          <div class="option-pill">
+            <input type="radio" name="paymentType" id="payDinheiro" value="Dinheiro">
+            <label for="payDinheiro">Dinheiro</label>
+          </div>
+          <div class="option-pill">
+            <input type="radio" name="paymentType" id="payCartao" value="Cartão">
+            <label for="payCartao">Cartão</label>
+          </div>
+        </div>
+
+        <div class="address-fields" id="trocoFields">
+          <input class="field-input" id="trocoInput" type="text" inputmode="decimal" placeholder="Precisa de troco para quanto? (opcional)">
+        </div>
+      </div>
+
+      <button class="modal-submit" type="submit">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.1-1.33C8.55 21.5 10.23 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.55 0-3-.42-4.24-1.15l-.3-.18-3.03.79.81-2.95-.2-.3A7.94 7.94 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z"/></svg>
+        ENVIAR PEDIDO NO WHATSAPP
+      </button>
+    </form>
+  </div>
+</div>
+
 <script>
 (function(){
   "use strict";
@@ -1311,7 +1592,7 @@
     });
   }
 
-  function buildWhatsappMessage(){
+  function buildWhatsappMessage(order){
     var lines = ["Olá! Gostaria de pedir:", ""];
     var total = 0;
     Object.keys(cart).forEach(function(name){
@@ -1319,6 +1600,21 @@
       lines.push("• " + item.qty + "x " + name);
       total += item.qty * item.price;
     });
+    lines.push("");
+
+    lines.push("*Entrega:* " + order.deliveryType);
+    if (order.deliveryType === "Entrega"){
+      lines.push("*Endereço:* " + order.address);
+      if (order.reference){
+        lines.push("*Referência:* " + order.reference);
+      }
+    }
+
+    lines.push("*Pagamento:* " + order.paymentType);
+    if (order.paymentType === "Dinheiro" && order.troco){
+      lines.push("*Troco para:* R$ " + order.troco);
+    }
+
     lines.push("");
     lines.push("Total: " + formatBRL(total));
     return lines.join("\n");
@@ -1406,12 +1702,76 @@
     row.classList.add("product-added");
   }
 
-  function finishOrder(){
+  // ---------- MODAL DE CHECKOUT ----------
+  var overlay = document.getElementById("checkoutOverlay");
+  var form = document.getElementById("checkoutForm");
+  var addressFields = document.getElementById("addressFields");
+  var addressInput = document.getElementById("addressInput");
+  var referenceInput = document.getElementById("referenceInput");
+  var addressError = document.getElementById("addressError");
+  var trocoFields = document.getElementById("trocoFields");
+  var trocoInput = document.getElementById("trocoInput");
+  var checkoutSummary = document.getElementById("checkoutSummary");
+
+  function openCheckout(){
     var totals = getTotals();
     if (totals.count === 0) return;
-    var message = buildWhatsappMessage();
+
+    var itemsHtml = Object.keys(cart).map(function(name){
+      return '<div class="modal-summary-row"><span>' + cart[name].qty + 'x ' + name + '</span></div>';
+    }).join("");
+
+    checkoutSummary.innerHTML = itemsHtml +
+      '<div class="modal-summary-row total"><span>Total</span><span>' + formatBRL(totals.total) + '</span></div>';
+
+    addressError.classList.remove("show");
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeCheckout(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  function toggleAddressFields(){
+    var isEntrega = document.getElementById("deliveryEntrega").checked;
+    addressFields.classList.toggle("show", isEntrega);
+    if (!isEntrega){
+      addressError.classList.remove("show");
+    }
+  }
+
+  function toggleTrocoField(){
+    var isDinheiro = document.getElementById("payDinheiro").checked;
+    trocoFields.classList.toggle("show", isDinheiro);
+  }
+
+  function finishOrder(){
+    var deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
+    var paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+
+    if (deliveryType === "Entrega" && !addressInput.value.trim()){
+      addressError.classList.add("show");
+      addressInput.focus();
+      return;
+    }
+    addressError.classList.remove("show");
+
+    var order = {
+      deliveryType: deliveryType,
+      address: addressInput.value.trim(),
+      reference: referenceInput.value.trim(),
+      paymentType: paymentType,
+      troco: trocoInput.value.trim()
+    };
+
+    var message = buildWhatsappMessage(order);
     var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
     window.open(url, "_blank", "noopener");
+    closeCheckout();
   }
 
   function initCarousel(){
@@ -1495,14 +1855,34 @@
     updateStoreStatus();
     setInterval(updateStoreStatus, 60000);
     initCarousel();
+
     var finishBtn = document.getElementById("cartFinishBtn");
     if (finishBtn){
-      finishBtn.addEventListener("click", finishOrder);
+      finishBtn.addEventListener("click", openCheckout);
     }
+
+    document.getElementById("checkoutClose").addEventListener("click", closeCheckout);
+    overlay.addEventListener("click", function(e){
+      if (e.target === overlay) closeCheckout();
+    });
+    document.addEventListener("keydown", function(e){
+      if (e.key === "Escape" && overlay.classList.contains("show")) closeCheckout();
+    });
+
+    document.getElementById("deliveryEntrega").addEventListener("change", toggleAddressFields);
+    document.getElementById("deliveryRetirada").addEventListener("change", toggleAddressFields);
+
+    document.getElementById("payPix").addEventListener("change", toggleTrocoField);
+    document.getElementById("payDinheiro").addEventListener("change", toggleTrocoField);
+    document.getElementById("payCartao").addEventListener("change", toggleTrocoField);
+
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+      finishOrder();
+    });
   });
 })();
 </script>
 
 </body>
 </html>
-```
