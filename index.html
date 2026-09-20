@@ -1,8 +1,12 @@
+```
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#241712">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Estação do Sabor — Pastel crocante &amp; Salgados</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -771,223 +775,71 @@
   }
 }
 
-/* ---------- MODAL DE CHECKOUT ---------- */
-.modal-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(36,23,18,0.55);
-  backdrop-filter: blur(2px);
-  z-index: 90;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.22s ease;
-  padding: 0;
-}
-.modal-overlay.show{
-  opacity: 1;
-  pointer-events: auto;
-}
 
-.modal-card{
-  background: var(--cream);
-  width: 100%;
-  max-width: 480px;
-  border-radius: 14px 14px 0 0;
-  padding: 26px 24px calc(24px + env(safe-area-inset-bottom, 0px));
-  max-height: 88vh;
-  overflow-y: auto;
-  transform: translateY(24px);
-  transition: transform 0.25s cubic-bezier(.2,.8,.2,1);
-  box-shadow: 0 -12px 40px rgba(0,0,0,0.3);
-}
-.modal-overlay.show .modal-card{
-  transform: translateY(0);
-}
+/* ==================== V3 / ESTRUTURA MOBILE-FIRST ==================== */
+:root{--mobile-nav-h:68px;--drawer-max:520px}
+html{scroll-padding-top:82px;-webkit-text-size-adjust:100%}
+body{min-width:320px;overscroll-behavior-x:none}
+button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
-@media (min-width: 640px){
-  .modal-overlay{ align-items: center; }
-  .modal-card{
-    border-radius: 10px;
-    transform: translateY(12px) scale(0.98);
-  }
-  .modal-overlay.show .modal-card{
-    transform: translateY(0) scale(1);
-  }
+.quick-nav{
+  position:sticky;top:0;z-index:50;background:rgba(255,246,232,.96);
+  border-bottom:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)
 }
+.quick-nav .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+.quick-nav .wrap::-webkit-scrollbar{display:none}
+.quick-nav a{flex:0 0 auto;text-decoration:none;font-size:11px;font-weight:700;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:#fffaf2}
+.quick-nav a.active,.quick-nav a:active{background:var(--ink);color:var(--cream);border-color:var(--ink)}
 
-.modal-head{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:stretch;margin-bottom:48px}
+.hero-panel{background:var(--board);color:var(--cream);padding:28px;border-radius:6px;border:1px solid var(--board-line);position:relative;overflow:hidden}
+.hero-panel:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-80px;bottom:-90px;background:rgba(232,149,30,.12)}
+.hero-kicker{font-size:11px;letter-spacing:.12em;color:var(--amber);font-weight:700;margin-bottom:8px}
+.hero-panel h2{color:var(--cream);font-size:clamp(28px,5vw,44px);line-height:1.02;margin-bottom:12px}
+.hero-panel p{color:rgba(255,246,232,.78);font-size:13px;max-width:48ch}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.hero-status{margin-top:18px;padding-top:14px;border-top:1px dashed var(--board-line);font-size:11px}
+.hero-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{background:#fffaf2;border:1px solid var(--line);padding:18px 14px;border-radius:5px;display:flex;flex-direction:column;justify-content:center;min-height:120px}
+.stat-card strong{font-family:'Fraunces',serif;font-size:23px}.stat-card span{font-size:10px;color:rgba(43,27,18,.62);margin-top:5px}
 
-.modal-head h3{
-  font-size: 21px;
-}
+.featured{margin-bottom:58px}.featured-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.feature-card{border:1px solid var(--line);background:#fffaf2;border-radius:5px;padding:16px;min-width:0}
+.feature-card .mini-icon{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--amber);display:grid;place-items:center;font-size:21px;margin-bottom:12px}
+.feature-card h3{font-size:17px;line-height:1.1}.feature-card p{font-size:11px;color:rgba(43,27,18,.62);min-height:34px}.feature-card .feature-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}.feature-price{font-weight:700;color:var(--red);font-size:13px}.feature-add{border:0;background:var(--red);color:#fff;padding:8px 10px;border-radius:3px;font:700 10px 'IBM Plex Mono';cursor:pointer}
 
-.modal-close{
-  background: transparent;
-  border: none;
-  color: var(--ink);
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 4px;
-  opacity: 0.6;
-}
-.modal-close:hover{ opacity: 1; }
+.menu-tools{position:sticky;top:53px;z-index:40;background:rgba(255,246,232,.97);padding:12px 0;margin:-20px 0 30px;border-bottom:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.search-box{display:flex;align-items:center;gap:10px;background:#fffaf2;border:1px solid var(--line);padding:11px 13px;border-radius:5px}.search-box span{font-size:16px}.search-box input{width:100%;border:0;outline:0;background:transparent;color:var(--ink);font:13px 'IBM Plex Mono';min-width:0}.filter-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-top:9px}.filter-row::-webkit-scrollbar{display:none}.filter-btn{flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--ink);padding:8px 11px;border-radius:999px;font:700 10px 'IBM Plex Mono';cursor:pointer}.filter-btn.active{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.menu-row.is-hidden{display:none}.empty-search{display:none;padding:24px;text-align:center;border:1px dashed var(--line);border-radius:5px;color:rgba(43,27,18,.6);font-size:12px}.empty-search.show{display:block}
 
-.modal-section{
-  margin-bottom: 20px;
-}
+/* Carrinho lateral + checkout */
+.drawer-backdrop{position:fixed;inset:0;background:rgba(15,9,6,.52);z-index:90;opacity:0;pointer-events:none;transition:opacity .22s ease}.drawer-backdrop.open{opacity:1;pointer-events:auto}
+.cart-drawer{position:fixed;z-index:91;right:0;top:0;height:100dvh;width:min(100%,var(--drawer-max));background:var(--cream);transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.2);padding-bottom:env(safe-area-inset-bottom)}.cart-drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:18px 18px 14px;border-bottom:1px solid var(--line);background:var(--board);color:var(--cream)}.drawer-head h2{color:var(--cream);font-size:24px}.drawer-close{width:38px;height:38px;border:1px solid var(--board-line);background:transparent;color:var(--cream);border-radius:4px;font-size:23px;cursor:pointer}.drawer-body{overflow:auto;padding:16px;flex:1;-webkit-overflow-scrolling:touch}.drawer-item{display:grid;grid-template-columns:1fr auto;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}.drawer-item-name{font-family:'Fraunces',serif;font-weight:600}.drawer-item-price{font-weight:700;color:var(--red);white-space:nowrap}.drawer-item-controls{display:flex;align-items:center;gap:8px;margin-top:7px}.drawer-item-controls button{width:30px;height:30px;border:1px solid var(--line);background:#fffaf2;border-radius:4px;cursor:pointer;font-weight:700}.drawer-footer{border-top:1px solid var(--line);padding:15px 16px;background:#fffaf2}.summary-line{display:flex;justify-content:space-between;gap:10px;margin:5px 0;font-size:12px}.summary-line.total{font-weight:800;font-size:17px;border-top:1px dashed var(--line);padding-top:10px;margin-top:10px}.checkout-btn{width:100%;border:0;background:var(--green);color:#fff;padding:14px;border-radius:4px;font:700 12px 'IBM Plex Mono';margin-top:12px;cursor:pointer}.continue-btn{width:100%;border:1px solid var(--line);background:transparent;color:var(--ink);padding:11px;border-radius:4px;font:700 11px 'IBM Plex Mono';margin-top:8px;cursor:pointer}
+.checkout-panel{display:none}.checkout-panel.open{display:block}.checkout-panel h3{font-size:20px;margin:8px 0 14px}.field{margin-bottom:11px}.field label{display:block;font-size:10px;font-weight:700;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:#fffaf2;border-radius:4px;padding:11px;font:12px 'IBM Plex Mono';outline:none;color:var(--ink)}.field textarea{min-height:70px;resize:vertical}.checkout-actions{display:grid;gap:8px;margin-top:12px}.back-checkout{border:0;background:transparent;padding:9px;font:700 11px 'IBM Plex Mono';cursor:pointer;color:var(--red)}
 
-.modal-label{
-  font-size: 12px;
-  color: var(--amber-dim);
-  letter-spacing: 0.03em;
-  margin-bottom: 10px;
-  display:block;
-}
+.mobile-bottom-nav{display:none}
 
-.option-grid{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 10px;
+/* iPhone / touch */
+@media(max-width:760px){
+  :root{--mobile-nav-h:66px}
+  body.has-cart{padding-bottom:calc(145px + env(safe-area-inset-bottom,0px))}
+  .wrap{padding-left:16px;padding-right:16px}
+  .board{padding:24px 0 28px}
+  .board-top{font-size:10px;margin-bottom:18px;padding-bottom:14px}
+  .brand{gap:12px}.brand-mark{width:46px;height:46px}.brand .tagline{font-size:14px}.board-sub{font-size:12px;margin-bottom:20px}.cta-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cta-row .btn{justify-content:center;padding:12px 8px;font-size:11px}
+  main{padding-top:28px}section{margin-bottom:44px}
+  .hero-grid{grid-template-columns:1fr;gap:10px;margin-bottom:38px}.hero-panel{padding:22px}.hero-stat{grid-template-columns:repeat(3,1fr)}.stat-card{min-height:92px;padding:12px 9px}.stat-card strong{font-size:18px}.stat-card span{font-size:8px}
+  .featured-grid{grid-template-columns:repeat(2,1fr);gap:9px}.feature-card{padding:12px}.feature-card p{min-height:0;margin-bottom:10px}.feature-card h3{font-size:15px}.feature-add{padding:9px 8px}
+  .menu-tools{top:53px;margin:-10px 0 24px}.platform-head{gap:8px;margin-bottom:14px}.platform-num{font-size:10px;padding:4px 7px}.platform-head h2{font-size:22px}.platform-note{font-size:9px}
+  .menu-row{padding:13px 0;gap:9px}.menu-name{font-size:16px;white-space:normal}.menu-desc{font-size:11px}.menu-price{font-size:13px}.add-btn{font-size:10px;padding:9px 9px}.qty-ctrl button{width:32px;height:34px}
+  .carousel-stage{touch-action:pan-y}.carousel-arrow{width:34px;height:34px}.ticket{min-width:0}
+  .info-strip{grid-template-columns:1fr!important}.foot-top{display:grid!important;gap:16px}.foot-bottom{display:grid!important;gap:8px}
+  .cart-bar{bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom,0px))!important}.cart-bar-inner{padding:8px 12px!important}.cart-finish-btn{padding:11px 12px!important;font-size:10px!important}
+  .mobile-bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:0;right:0;bottom:0;z-index:60;height:var(--mobile-nav-h);padding-bottom:env(safe-area-inset-bottom);background:rgba(36,23,18,.98);border-top:1px solid var(--board-line)}.mobile-bottom-nav a,.mobile-bottom-nav button{border:0;background:transparent;color:rgba(255,246,232,.72);font:700 9px 'IBM Plex Mono';display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none}.mobile-bottom-nav .nav-icon{font-size:18px;line-height:1}.mobile-bottom-nav .active{color:var(--gold)}
 }
-
-.option-pill{
-  position: relative;
-}
-
-.option-pill input{
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.option-pill label{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: 6px;
-  border: 1.5px solid var(--line);
-  border-radius: 6px;
-  padding: 12px 10px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
-  text-align: center;
-}
-
-.option-pill input:checked + label{
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--cream);
-}
-
-.option-pill input:focus-visible + label{
-  outline: 3px solid var(--red);
-  outline-offset: 2px;
-}
-
-.field-input, .field-textarea{
-  width: 100%;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  color: var(--ink);
-  background: #fff;
-  border: 1.5px solid var(--line);
-  border-radius: 6px;
-  padding: 12px 14px;
-  resize: vertical;
-}
-
-.field-input:focus, .field-textarea:focus{
-  outline: none;
-  border-color: var(--ink);
-}
-
-.address-fields{
-  display:none;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 12px;
-}
-.address-fields.show{ display: flex; }
-
-.field-hint{
-  font-size: 11px;
-  color: rgba(43,27,18,0.5);
-  margin-top: -4px;
-}
-
-.modal-summary{
-  background: var(--board);
-  color: var(--cream);
-  border-radius: 8px;
-  padding: 16px 18px;
-  margin-bottom: 20px;
-}
-
-.modal-summary-row{
-  display:flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: rgba(255,246,232,0.75);
-  padding: 3px 0;
-}
-
-.modal-summary-row.total{
-  border-top: 1px dashed var(--board-line);
-  margin-top: 8px;
-  padding-top: 10px;
-  font-family: 'Fraunces', serif;
-  font-weight: 700;
-  font-size: 17px;
-  color: var(--gold);
-}
-
-.modal-error{
-  font-size: 12px;
-  color: var(--red);
-  font-weight: 600;
-  margin-top: -6px;
-  margin-bottom: 14px;
-  display: none;
-}
-.modal-error.show{ display: block; }
-
-.modal-submit{
-  width: 100%;
-  background: var(--green);
-  color: var(--cream);
-  border: none;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.02em;
-  padding: 15px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: 8px;
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-.modal-submit:hover{ background: #427a4c; transform: translateY(-1px); }
-.modal-submit svg{ width: 16px; height: 16px; }
-
-@media (prefers-reduced-motion: reduce){
-  .modal-overlay, .modal-card, .modal-submit, .option-pill label{
-    transition: none !important;
-  }
-}
+@media(max-width:380px){.cta-row{grid-template-columns:1fr}.featured-grid{grid-template-columns:1fr}.hero-stat{gap:6px}.stat-card{padding:10px 7px}.stat-card strong{font-size:16px}}
+@supports(padding:max(0px)){.mobile-bottom-nav{padding-bottom:max(8px,env(safe-area-inset-bottom))}}
 
 </style>
 </head>
@@ -1032,10 +884,58 @@
   </div>
 </header>
 
+
+<nav class="quick-nav" aria-label="Navegação rápida">
+  <div class="wrap">
+    <a href="#inicio" class="active">Início</a>
+    <a href="#destaques">🔥 Mais pedidos</a>
+    <a href="#cardapio">🍴 Cardápio</a>
+    <a href="#combos">🎟️ Combos</a>
+    <a href="#informacoes">📍 Entrega</a>
+  </div>
+</nav>
+
+<div id="inicio"></div>
 <main>
   <div class="wrap">
+    <section class="hero-grid" aria-label="Resumo da loja">
+      <div class="hero-panel">
+        <div class="hero-kicker">ESTAÇÃO DO SABOR · PEDIDO ONLINE</div>
+        <h2>Seu pedido começa aqui.</h2>
+        <p>Escolha seus favoritos, monte o carrinho e envie tudo organizado pelo WhatsApp.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#cardapio">Ver cardápio</a>
+          <button class="btn btn-ghost" type="button" id="heroCartBtn">Meu pedido</button>
+        </div>
+        <div class="hero-status" id="heroStatus">Verificando horário da loja...</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-card"><strong>🥟</strong><span>Pastéis e salgados</span></div>
+        <div class="stat-card"><strong>🛵</strong><span>Entrega</span></div>
+        <div class="stat-card"><strong>💬</strong><span>Pedido via WhatsApp</span></div>
+      </div>
+    </section>
 
-    <section id="pasteis-simples">
+    <section id="destaques" class="featured">
+      <div class="platform-head"><span class="platform-num">RÁPIDO</span><h2>Mais pedidos</h2><span class="platform-note">Escolha e adicione</span></div>
+      <div class="featured-grid" id="featuredGrid"></div>
+    </section>
+
+    <section id="cardapio">
+      <div class="platform-head"><span class="platform-num">CARDÁPIO</span><h2>Escolha seus favoritos</h2></div>
+      <div class="menu-tools">
+        <div class="search-box"><span>⌕</span><input id="menuSearch" type="search" inputmode="search" autocomplete="off" placeholder="Buscar no cardápio..." aria-label="Buscar no cardápio"></div>
+        <div class="filter-row" role="tablist" aria-label="Categorias">
+          <button class="filter-btn active" data-filter="all" type="button">Todos</button>
+          <button class="filter-btn" data-filter="pasteis" type="button">Pastéis</button>
+          <button class="filter-btn" data-filter="salgados" type="button">Salgados</button>
+          <button class="filter-btn" data-filter="bebidas" type="button">Bebidas</button>
+          <button class="filter-btn" data-filter="combos" type="button">Combos</button>
+        </div>
+      </div>
+      <div id="emptySearch" class="empty-search">Nenhum produto encontrado. Tente outro nome.</div>
+
+    <section id="pasteis-simples" data-category="pasteis">
       <div class="platform-head">
         <span class="platform-num">Cardapio 1</span>
         <h2>Pastéis simples</h2>
@@ -1100,7 +1000,7 @@
       </div>
     </section>
 
-    <section id="pasteis-especiais">
+    <section id="pasteis-especiais" data-category="pasteis">
       <div class="platform-head">
         <span class="platform-num">Cardapio 2</span>
         <h2>Pastéis especiais</h2>
@@ -1164,7 +1064,7 @@
       </div>
     </section>
 
-    <section id="salgados">
+    <section id="salgados" data-category="salgados">
       <div class="platform-head">
         <span class="platform-num">Cardapio 3</span>
         <h2>Salgados</h2>
@@ -1239,7 +1139,7 @@
       </div>
     </section>
 
-    <section id="bebidas">
+    <section id="bebidas" data-category="bebidas">
       <div class="platform-head">
         <span class="platform-num">Cardapio 4</span>
         <h2>Bebidas</h2>
@@ -1297,8 +1197,9 @@
         </div>
       </div>
     </section>
+    </section>
 
-    <section id="combos">
+    <section id="combos" data-category="combos">
       <div class="platform-head">
         <span class="platform-num">PASSAGENS</span>
         <h2>Combos</h2>
@@ -1362,7 +1263,7 @@
       <div class="carousel-dots" id="comboDots"></div>
     </section>
 
-    <section class="info-strip" aria-label="Informações de entrega e pagamento">
+    <section id="informacoes" class="info-strip" aria-label="Informações de entrega e pagamento">
       <div class="info-block">
         <div class="label">ENTREGA</div>
         <div class="value">Fazemos entrega 🛵</div>
@@ -1403,6 +1304,43 @@
   </div>
 </footer>
 
+
+<nav class="mobile-bottom-nav" aria-label="Navegação mobile">
+  <a href="#inicio" class="active"><span class="nav-icon">⌂</span>Início</a>
+  <a href="#cardapio"><span class="nav-icon">🍴</span>Cardápio</a>
+  <a href="#combos"><span class="nav-icon">🔥</span>Combos</a>
+  <button type="button" id="mobileCartBtn"><span class="nav-icon">🛒</span>Pedido</button>
+</nav>
+
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="cart-drawer" id="cartDrawer" aria-label="Meu pedido" aria-hidden="true">
+  <div class="drawer-head"><h2 id="drawerTitle">Meu pedido</h2><button class="drawer-close" id="drawerClose" type="button" aria-label="Fechar pedido">×</button></div>
+  <div class="drawer-body" id="drawerBody">
+    <div id="drawerCartView">
+      <div id="drawerItems"></div>
+      <div id="drawerEmpty" style="padding:35px 5px;text-align:center;color:rgba(43,27,18,.58);font-size:12px">Seu pedido está vazio.<br>Escolha algo gostoso no cardápio.</div>
+    </div>
+    <div class="checkout-panel" id="checkoutPanel">
+      <h3>Dados para entrega</h3>
+      <div class="field"><label for="customerName">Nome</label><input id="customerName" autocomplete="name" placeholder="Seu nome"></div>
+      <div class="field"><label for="customerPhone">Telefone</label><input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(79) 99999-9999"></div>
+      <div class="field"><label for="customerAddress">Endereço</label><input id="customerAddress" autocomplete="street-address" placeholder="Rua / Avenida"></div>
+      <div class="field"><label for="customerNumber">Número</label><input id="customerNumber" inputmode="numeric" autocomplete="address-line2" placeholder="Número"></div>
+      <div class="field"><label for="customerNeighborhood">Bairro</label><input id="customerNeighborhood" autocomplete="address-level3" placeholder="Bairro"></div>
+      <div class="field"><label for="customerComplement">Complemento</label><input id="customerComplement" autocomplete="off" placeholder="Apartamento, referência etc."></div>
+      <div class="field"><label for="paymentMethod">Pagamento</label><select id="paymentMethod"><option>Pix</option><option>Dinheiro</option><option>Cartão</option></select></div>
+      <div class="field"><label for="orderNotes">Observação</label><textarea id="orderNotes" placeholder="Ex.: sem cebola, molho à parte..."></textarea></div>
+      <div class="checkout-actions"><button class="checkout-btn" id="sendWhatsappBtn" type="button">ENVIAR PEDIDO PELO WHATSAPP</button><button class="back-checkout" id="backToCart" type="button">← Voltar ao pedido</button></div>
+    </div>
+  </div>
+  <div class="drawer-footer" id="drawerFooter">
+    <div class="summary-line"><span>Itens</span><strong id="drawerCount">0</strong></div>
+    <div class="summary-line total"><span>Total</span><strong id="drawerTotal">R$ 0,00</strong></div>
+    <button class="checkout-btn" id="checkoutBtn" type="button">CONTINUAR PARA ENTREGA</button>
+    <button class="continue-btn" id="continueBtn" type="button">CONTINUAR COMPRANDO</button>
+  </div>
+</aside>
+
 <!-- ---------- CARRINHO FIXO ---------- -->
 <div class="cart-bar" id="cartBar" role="region" aria-label="Carrinho de pedido">
   <div class="cart-bar-inner">
@@ -1414,69 +1352,6 @@
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.1-1.33C8.55 21.5 10.23 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.55 0-3-.42-4.24-1.15l-.3-.18-3.03.79.81-2.95-.2-.3A7.94 7.94 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z"/></svg>
       FINALIZAR NO WHATSAPP
     </button>
-  </div>
-</div>
-
-<!-- ---------- MODAL DE CHECKOUT (PAGAMENTO + ENTREGA) ---------- -->
-<div class="modal-overlay" id="checkoutOverlay" aria-hidden="true">
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
-    <div class="modal-head">
-      <h3 id="checkoutTitle">Só falta isso 🙌</h3>
-      <button class="modal-close" id="checkoutClose" type="button" aria-label="Fechar">&times;</button>
-    </div>
-
-    <div class="modal-summary" id="checkoutSummary">
-      <!-- preenchido via JS -->
-    </div>
-
-    <form id="checkoutForm">
-      <div class="modal-section">
-        <span class="modal-label">COMO VOCÊ QUER RECEBER?</span>
-        <div class="option-grid" id="deliveryOptions">
-          <div class="option-pill">
-            <input type="radio" name="deliveryType" id="deliveryEntrega" value="Entrega" checked>
-            <label for="deliveryEntrega">🛵 Entrega</label>
-          </div>
-          <div class="option-pill">
-            <input type="radio" name="deliveryType" id="deliveryRetirada" value="Retirada no local">
-            <label for="deliveryRetirada">🏠 Retirar no local</label>
-          </div>
-        </div>
-
-        <div class="address-fields show" id="addressFields">
-          <textarea class="field-textarea" id="addressInput" rows="2" placeholder="Rua, número, bairro, complemento..."></textarea>
-          <input class="field-input" id="referenceInput" type="text" placeholder="Ponto de referência (opcional)">
-        </div>
-        <div class="modal-error" id="addressError">Digite o endereço de entrega pra continuar.</div>
-      </div>
-
-      <div class="modal-section">
-        <span class="modal-label">FORMA DE PAGAMENTO</span>
-        <div class="option-grid" id="paymentOptions">
-          <div class="option-pill">
-            <input type="radio" name="paymentType" id="payPix" value="Pix" checked>
-            <label for="payPix">Pix</label>
-          </div>
-          <div class="option-pill">
-            <input type="radio" name="paymentType" id="payDinheiro" value="Dinheiro">
-            <label for="payDinheiro">Dinheiro</label>
-          </div>
-          <div class="option-pill">
-            <input type="radio" name="paymentType" id="payCartao" value="Cartão">
-            <label for="payCartao">Cartão</label>
-          </div>
-        </div>
-
-        <div class="address-fields" id="trocoFields">
-          <input class="field-input" id="trocoInput" type="text" inputmode="decimal" placeholder="Precisa de troco para quanto? (opcional)">
-        </div>
-      </div>
-
-      <button class="modal-submit" type="submit">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.1-1.33C8.55 21.5 10.23 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.55 0-3-.42-4.24-1.15l-.3-.18-3.03.79.81-2.95-.2-.3A7.94 7.94 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z"/></svg>
-        ENVIAR PEDIDO NO WHATSAPP
-      </button>
-    </form>
   </div>
 </div>
 
@@ -1519,6 +1394,7 @@
     } else {
       bar.classList.remove("show");
     }
+    if(document.getElementById("cartDrawer") && document.getElementById("cartDrawer").classList.contains("open")) renderDrawer();
   }
 
   function renderControl(container, name, price){
@@ -1592,7 +1468,7 @@
     });
   }
 
-  function buildWhatsappMessage(order){
+  function buildWhatsappMessage(){
     var lines = ["Olá! Gostaria de pedir:", ""];
     var total = 0;
     Object.keys(cart).forEach(function(name){
@@ -1600,21 +1476,6 @@
       lines.push("• " + item.qty + "x " + name);
       total += item.qty * item.price;
     });
-    lines.push("");
-
-    lines.push("*Entrega:* " + order.deliveryType);
-    if (order.deliveryType === "Entrega"){
-      lines.push("*Endereço:* " + order.address);
-      if (order.reference){
-        lines.push("*Referência:* " + order.reference);
-      }
-    }
-
-    lines.push("*Pagamento:* " + order.paymentType);
-    if (order.paymentType === "Dinheiro" && order.troco){
-      lines.push("*Troco para:* R$ " + order.troco);
-    }
-
     lines.push("");
     lines.push("Total: " + formatBRL(total));
     return lines.join("\n");
@@ -1655,6 +1516,7 @@
     if(!schedule){
       label.textContent="FECHADO AGORA";
       extra.textContent="Voltamos no próximo dia de atendimento";
+      var hs=document.getElementById("heroStatus"); if(hs)hs.textContent="🔴 Loja fechada agora";
       status.classList.add("closed");
       dot.classList.add("closed");
       return;
@@ -1665,11 +1527,13 @@
     if(minutes>=open && minutes<close){
       label.textContent="ABERTO AGORA · SALGADOS FRITOS NA HORA";
       extra.textContent="Até "+schedule[1];
+      var hs=document.getElementById("heroStatus"); if(hs)hs.textContent="🟢 Loja aberta agora · fecha às "+schedule[1];
     }else{
       label.textContent="FECHADO AGORA";
       extra.textContent=minutes<open
         ?"Abre hoje às "+schedule[0]
         :"Encerrado às "+schedule[1];
+      var hs=document.getElementById("heroStatus"); if(hs)hs.textContent="🔴 Loja fechada · "+extra.textContent;
       status.classList.add("closed");
       dot.classList.add("closed");
     }
@@ -1702,76 +1566,125 @@
     row.classList.add("product-added");
   }
 
-  // ---------- MODAL DE CHECKOUT ----------
-  var overlay = document.getElementById("checkoutOverlay");
-  var form = document.getElementById("checkoutForm");
-  var addressFields = document.getElementById("addressFields");
-  var addressInput = document.getElementById("addressInput");
-  var referenceInput = document.getElementById("referenceInput");
-  var addressError = document.getElementById("addressError");
-  var trocoFields = document.getElementById("trocoFields");
-  var trocoInput = document.getElementById("trocoInput");
-  var checkoutSummary = document.getElementById("checkoutSummary");
 
-  function openCheckout(){
-    var totals = getTotals();
-    if (totals.count === 0) return;
+  // ---------- V3: BUSCA, FILTROS, DESTAQUES E CARRINHO ----------
+  var featuredProducts = [
+    {name:"Pastel de carne", price:7, icon:"🥟", desc:"Carne moída de qualidade"},
+    {name:"Pastel de frango com catupiry", price:8, icon:"🍗", desc:"Frango com catupiry"},
+    {name:"Pastel de camarão", price:10, icon:"🍤", desc:"Camarão, queijo e cheddar"},
+    {name:"Coxinha de frango", price:6, icon:"🍗", desc:"Frango desfiado"}
+  ];
 
-    var itemsHtml = Object.keys(cart).map(function(name){
-      return '<div class="modal-summary-row"><span>' + cart[name].qty + 'x ' + name + '</span></div>';
-    }).join("");
-
-    checkoutSummary.innerHTML = itemsHtml +
-      '<div class="modal-summary-row total"><span>Total</span><span>' + formatBRL(totals.total) + '</span></div>';
-
-    addressError.classList.remove("show");
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
+  function findProductElement(name){
+    var nodes=document.querySelectorAll("[data-name]");
+    for(var i=0;i<nodes.length;i++) if(nodes[i].getAttribute("data-name")===name) return nodes[i];
+    return null;
   }
 
-  function closeCheckout(){
-    overlay.classList.remove("show");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+  function renderFeatured(){
+    var grid=document.getElementById("featuredGrid"); if(!grid)return;
+    grid.innerHTML="";
+    featuredProducts.forEach(function(item){
+      var card=document.createElement("div"); card.className="feature-card";
+      card.innerHTML='<div class="mini-icon">'+item.icon+'</div><h3>'+item.name.replace("Pastel de ","")+ '</h3><p>'+item.desc+'</p><div class="feature-bottom"><span class="feature-price">'+formatBRL(item.price)+'</span><button class="feature-add" type="button">+ ADICIONAR</button></div>';
+      card.querySelector("button").addEventListener("click",function(){
+        cart[item.name]=cart[item.name]||{price:item.price,qty:0};
+        cart[item.name].qty+=1; updateCartBar(); renderDrawer(); animateCart(); showToast(item.name+" adicionado ao pedido");
+      });
+      grid.appendChild(card);
+    });
   }
 
-  function toggleAddressFields(){
-    var isEntrega = document.getElementById("deliveryEntrega").checked;
-    addressFields.classList.toggle("show", isEntrega);
-    if (!isEntrega){
-      addressError.classList.remove("show");
-    }
+  function applyMenuFilter(){
+    var query=(document.getElementById("menuSearch")||{}).value||"";
+    query=query.trim().toLowerCase();
+    var active=document.querySelector(".filter-btn.active");
+    var filter=active?active.getAttribute("data-filter"):"all";
+    var rows=document.querySelectorAll(".menu-row"); var visible=0;
+    rows.forEach(function(row){
+      var name=(row.getAttribute("data-name")||"").toLowerCase();
+      var parent=row.closest("section[data-category]");
+      var cat=parent?parent.getAttribute("data-category"):"";
+      var okQuery=!query||name.indexOf(query)>=0;
+      var okFilter=filter==="all"||cat===filter;
+      var show=okQuery&&okFilter;
+      row.classList.toggle("is-hidden",!show);
+      if(show)visible++;
+    });
+    document.querySelectorAll("section[data-category]").forEach(function(sec){
+      if(sec.id==="combos") return;
+      var any=sec.querySelectorAll(".menu-row:not(.is-hidden)").length>0;
+      sec.style.display=any?"":"none";
+    });
+    var empty=document.getElementById("emptySearch"); if(empty)empty.classList.toggle("show",visible===0);
   }
 
-  function toggleTrocoField(){
-    var isDinheiro = document.getElementById("payDinheiro").checked;
-    trocoFields.classList.toggle("show", isDinheiro);
+  function renderDrawer(){
+    var items=document.getElementById("drawerItems"), empty=document.getElementById("drawerEmpty");
+    if(!items)return;
+    items.innerHTML=""; var totals=getTotals();
+    empty.style.display=totals.count?"none":"block";
+    Object.keys(cart).forEach(function(name){
+      var item=cart[name], row=document.createElement("div"); row.className="drawer-item";
+      row.innerHTML='<div><div class="drawer-item-name">'+name+'</div><div class="drawer-item-controls"><button type="button" data-act="minus" aria-label="Diminuir">−</button><strong>'+item.qty+'</strong><button type="button" data-act="plus" aria-label="Aumentar">+</button></div></div><div class="drawer-item-price">'+formatBRL(item.qty*item.price)+'</div>';
+      row.querySelector('[data-act="minus"]').onclick=function(){item.qty--;if(item.qty<=0)delete cart[name];updateCartBar();renderDrawer();};
+      row.querySelector('[data-act="plus"]').onclick=function(){item.qty++;updateCartBar();renderDrawer();animateCart();};
+      items.appendChild(row);
+    });
+    document.getElementById("drawerCount").textContent=totals.count+(totals.count===1?" item":" itens");
+    document.getElementById("drawerTotal").textContent=formatBRL(totals.total);
+    document.getElementById("checkoutBtn").disabled=totals.count===0;
+    document.getElementById("checkoutBtn").style.opacity=totals.count===0?.5:1;
+  }
+
+  function openCart(){
+    renderDrawer();
+    var d=document.getElementById("cartDrawer"), b=document.getElementById("drawerBackdrop");
+    d.classList.add("open"); b.classList.add("open"); d.setAttribute("aria-hidden","false");
+    document.body.style.overflow="hidden";
+  }
+  function closeCart(){
+    var d=document.getElementById("cartDrawer"), b=document.getElementById("drawerBackdrop");
+    d.classList.remove("open"); b.classList.remove("open"); d.setAttribute("aria-hidden","true"); document.body.style.overflow="";
+  }
+  function showCheckout(){
+    if(getTotals().count===0){showToast("Adicione pelo menos um item");return;}
+    document.getElementById("drawerCartView").style.display="none";
+    document.getElementById("checkoutPanel").classList.add("open");
+    document.getElementById("drawerFooter").style.display="none";
+    document.getElementById("drawerTitle").textContent="Finalizar pedido";
+    document.getElementById("drawerBody").scrollTop=0;
+  }
+  function hideCheckout(){
+    document.getElementById("drawerCartView").style.display="block";
+    document.getElementById("checkoutPanel").classList.remove("open");
+    document.getElementById("drawerFooter").style.display="block";
+    document.getElementById("drawerTitle").textContent="Meu pedido";
+  }
+  function buildCheckoutMessage(){
+    var lines=["Olá! Gostaria de fazer um pedido:",""];
+    Object.keys(cart).forEach(function(name){lines.push("• "+cart[name].qty+"x "+name+" — "+formatBRL(cart[name].qty*cart[name].price));});
+    var t=getTotals(); lines.push("", "Total: "+formatBRL(t.total), "", "📍 ENTREGA");
+    var fields=[
+      ["Nome","customerName"],["Telefone","customerPhone"],["Endereço","customerAddress"],
+      ["Número","customerNumber"],["Bairro","customerNeighborhood"],["Complemento","customerComplement"],
+      ["Pagamento","paymentMethod"],["Observação","orderNotes"]
+    ];
+    fields.forEach(function(pair){var el=document.getElementById(pair[1]);if(el&&el.value.trim())lines.push(pair[0]+": "+el.value.trim());});
+    return lines.join("\n");
+  }
+  function sendCheckout(){
+    if(getTotals().count===0)return;
+    var url="https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(buildCheckoutMessage());
+    window.location.href=url;
   }
 
   function finishOrder(){
-    var deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
-    var paymentType = document.querySelector('input[name="paymentType"]:checked').value;
-
-    if (deliveryType === "Entrega" && !addressInput.value.trim()){
-      addressError.classList.add("show");
-      addressInput.focus();
-      return;
-    }
-    addressError.classList.remove("show");
-
-    var order = {
-      deliveryType: deliveryType,
-      address: addressInput.value.trim(),
-      reference: referenceInput.value.trim(),
-      paymentType: paymentType,
-      troco: trocoInput.value.trim()
-    };
-
-    var message = buildWhatsappMessage(order);
+    var totals = getTotals();
+    if (totals.count === 0) return;
+    var message = buildWhatsappMessage();
     var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
     window.open(url, "_blank", "noopener");
-    closeCheckout();
   }
 
   function initCarousel(){
@@ -1850,39 +1763,29 @@
   }
 
   document.addEventListener("DOMContentLoaded", function(){
+    document.getElementById("cartFinishBtn").addEventListener("click", openCart);
+    document.getElementById("heroCartBtn").addEventListener("click", openCart);
+    document.getElementById("mobileCartBtn").addEventListener("click", openCart);
+    document.getElementById("drawerClose").addEventListener("click", closeCart);
+    document.getElementById("drawerBackdrop").addEventListener("click", closeCart);
+    document.getElementById("continueBtn").addEventListener("click", closeCart);
+    document.getElementById("checkoutBtn").addEventListener("click", showCheckout);
+    document.getElementById("backToCart").addEventListener("click", hideCheckout);
+    document.getElementById("sendWhatsappBtn").addEventListener("click", sendCheckout);
+    document.getElementById("menuSearch").addEventListener("input", applyMenuFilter);
+    document.querySelectorAll(".filter-btn").forEach(function(btn){btn.addEventListener("click",function(){document.querySelectorAll(".filter-btn").forEach(function(b){b.classList.remove("active")});btn.classList.add("active");applyMenuFilter();});});
+    document.addEventListener("keydown",function(e){if(e.key==="Escape")closeCart();});
     initProducts();
+    renderFeatured();
+    renderDrawer();
     updateCartBar();
     updateStoreStatus();
     setInterval(updateStoreStatus, 60000);
     initCarousel();
-
-    var finishBtn = document.getElementById("cartFinishBtn");
-    if (finishBtn){
-      finishBtn.addEventListener("click", openCheckout);
-    }
-
-    document.getElementById("checkoutClose").addEventListener("click", closeCheckout);
-    overlay.addEventListener("click", function(e){
-      if (e.target === overlay) closeCheckout();
-    });
-    document.addEventListener("keydown", function(e){
-      if (e.key === "Escape" && overlay.classList.contains("show")) closeCheckout();
-    });
-
-    document.getElementById("deliveryEntrega").addEventListener("change", toggleAddressFields);
-    document.getElementById("deliveryRetirada").addEventListener("change", toggleAddressFields);
-
-    document.getElementById("payPix").addEventListener("change", toggleTrocoField);
-    document.getElementById("payDinheiro").addEventListener("change", toggleTrocoField);
-    document.getElementById("payCartao").addEventListener("change", toggleTrocoField);
-
-    form.addEventListener("submit", function(e){
-      e.preventDefault();
-      finishOrder();
-    });
   });
 })();
 </script>
 
 </body>
 </html>
+```
