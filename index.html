@@ -853,7 +853,18 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
   opacity:.9;
 }
 
+
+/* ---------- ESTOQUE ONLINE ---------- */
+.stock-info{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:6px;font-size:10px;line-height:1.2;min-height:18px}
+.stock-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-weight:700;letter-spacing:.02em}
+.stock-badge.available{background:rgba(79,143,91,.12);color:var(--green)}
+.stock-badge.low{background:rgba(232,149,30,.14);color:#9a5d00}
+.stock-badge.out{background:rgba(178,58,46,.12);color:var(--red)}
+.add-ctrl.stock-disabled{opacity:.72}
+.add-btn[disabled],.feature-add[disabled]{cursor:not-allowed;opacity:.58}
+
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1369,6 +1380,19 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
 (function(){
   "use strict";
 
+  // ---------- SUPABASE / ESTOQUE ONLINE ----------
+  var SUPABASE_URL = "https://edlkcdibjnyrypuzusqm.supabase.co";
+  // Cole aqui a sua Publishable key (sb_publishable_...) do Supabase.
+  var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_WK6iafN9BHuRgqHze1vjOA_gDzGPKpO";
+  var supabaseClient = null;
+  var stock = {};
+  var stockLoading = false;
+  var orderBeingReserved = false;
+
+  if (window.supabase && SUPABASE_PUBLISHABLE_KEY.indexOf("COLE_") !== 0) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  }
+
   var WHATSAPP_NUMBER = "5579996631232";
 
   // cart = { "Pastel de carne": { price: 7, qty: 2 }, ... }
@@ -1407,18 +1431,66 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
     if(document.getElementById("cartDrawer") && document.getElementById("cartDrawer").classList.contains("open")) renderDrawer();
   }
 
+  function getStock(name){
+    return Object.prototype.hasOwnProperty.call(stock,name) ? stock[name] : null;
+  }
+
+  function stockLabel(value){
+    if(value === null) return "Verificando estoque...";
+    if(value <= 0) return "ESGOTADO";
+    if(value <= 3) return "Restam " + value;
+    return "Disponível: " + value;
+  }
+
+  function ensureStockInfo(row){
+    if(!row) return null;
+    var info=row.querySelector(".stock-info");
+    if(!info){
+      info=document.createElement("div");
+      info.className="stock-info";
+      var control=row.querySelector(".add-ctrl");
+      if(control) control.parentNode.insertBefore(info,control);
+    }
+    return info;
+  }
+
+  function renderStockInfo(row,name){
+    var info=ensureStockInfo(row);
+    if(!info)return;
+    var value=getStock(name);
+    info.innerHTML="";
+    var badge=document.createElement("span");
+    badge.className="stock-badge " + (value===null ? "low" : value<=0 ? "out" : value<=3 ? "low" : "available");
+    badge.textContent=stockLabel(value);
+    info.appendChild(badge);
+  }
+
   function renderControl(container, name, price){
     container.innerHTML = "";
-
+    var available=getStock(name);
     var qty = cart[name] ? cart[name].qty : 0;
+    container.classList.toggle("stock-disabled", available !== null && available <= 0);
+
+    if (available !== null && available <= 0){
+      var sold=document.createElement("button");
+      sold.className="add-btn";
+      sold.type="button";
+      sold.disabled=true;
+      sold.textContent="ESGOTADO";
+      container.appendChild(sold);
+      return;
+    }
 
     if (qty === 0){
       var addBtn = document.createElement("button");
       addBtn.className = "add-btn";
       addBtn.type = "button";
+      addBtn.disabled = available === 0;
       addBtn.setAttribute("aria-label", "Adicionar " + name);
       addBtn.textContent = "+ ADICIONAR";
       addBtn.addEventListener("click", function(){
+        var current=getStock(name);
+        if(current !== null && current <= 0){showToast(name+" está esgotado");return;}
         cart[name] = { price: price, qty: 1 };
         renderControl(container, name, price);
         updateCartBar();
@@ -1437,9 +1509,7 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
       minusBtn.textContent = "–";
       minusBtn.addEventListener("click", function(){
         cart[name].qty -= 1;
-        if (cart[name].qty <= 0){
-          delete cart[name];
-        }
+        if (cart[name].qty <= 0){ delete cart[name]; }
         renderControl(container, name, price);
         updateCartBar();
       });
@@ -1452,7 +1522,13 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
       plusBtn.type = "button";
       plusBtn.setAttribute("aria-label", "Adicionar mais uma unidade de " + name);
       plusBtn.textContent = "+";
+      plusBtn.disabled = available !== null && qty >= available;
       plusBtn.addEventListener("click", function(){
+        var current=getStock(name);
+        if(current !== null && cart[name].qty >= current){
+          showToast("Limite de estoque atingido: "+current);
+          return;
+        }
         cart[name].qty += 1;
         renderControl(container, name, price);
         updateCartBar();
@@ -1466,6 +1542,51 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
     }
   }
 
+  function renderAllStockControls(){
+    document.querySelectorAll("[data-name][data-price]").forEach(function(row){
+      var name=row.getAttribute("data-name");
+      var price=parseFloat(row.getAttribute("data-price"));
+      var container=row.querySelector(".add-ctrl");
+      if(container && !isNaN(price)){
+        renderStockInfo(row,name);
+        renderControl(container,name,price);
+      }
+    });
+  }
+
+  function syncCartWithStock(){
+    var changed=false;
+    Object.keys(cart).forEach(function(name){
+      var available=getStock(name);
+      if(available === null)return;
+      if(available <= 0){delete cart[name];changed=true;return;}
+      if(cart[name].qty > available){cart[name].qty=available;changed=true;}
+    });
+    if(changed) showToast("O estoque foi atualizado. Seu pedido foi ajustado.");
+  }
+
+  async function loadStock(showError){
+    if(!supabaseClient || stockLoading)return false;
+    stockLoading=true;
+    try{
+      var result=await supabaseClient.rpc("obter_estoque");
+      if(result.error)throw result.error;
+      var rows=result.data || [];
+      stock={};
+      rows.forEach(function(item){stock[item.nome]=Number(item.estoque)||0;});
+      syncCartWithStock();
+      renderAllStockControls();
+      updateCartBar();
+      return true;
+    }catch(err){
+      console.error("Erro ao carregar estoque:",err);
+      if(showError)showToast("Não foi possível atualizar o estoque.");
+      return false;
+    }finally{
+      stockLoading=false;
+    }
+  }
+
   function initProducts(){
     var rows = document.querySelectorAll("[data-name][data-price]");
     rows.forEach(function(row){
@@ -1473,6 +1594,7 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
       var price = parseFloat(row.getAttribute("data-price"));
       var container = row.querySelector(".add-ctrl");
       if (container && !isNaN(price)){
+        renderStockInfo(row,name);
         renderControl(container, name, price);
       }
     });
@@ -1597,9 +1719,14 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
     featuredProducts.forEach(function(item){
       var card=document.createElement("div"); card.className="feature-card";
       card.innerHTML='<div class="mini-icon">'+item.icon+'</div><h3>'+item.name.replace("Pastel de ","")+ '</h3><p>'+item.desc+'</p><div class="feature-bottom"><span class="feature-price">'+formatBRL(item.price)+'</span><button class="feature-add" type="button">+ ADICIONAR</button></div>';
-      card.querySelector("button").addEventListener("click",function(){
+      var featureBtn=card.querySelector("button");
+      var available=getStock(item.name);
+      if(available !== null && available <= 0){featureBtn.disabled=true;featureBtn.textContent="ESGOTADO";}
+      featureBtn.addEventListener("click",function(){
+        var current=getStock(item.name);
+        if(current !== null && (!current || (cart[item.name] && cart[item.name].qty >= current))){showToast(item.name+" está no limite de estoque");return;}
         cart[item.name]=cart[item.name]||{price:item.price,qty:0};
-        cart[item.name].qty+=1; updateCartBar(); renderDrawer(); animateCart(); showToast(item.name+" adicionado ao pedido");
+        cart[item.name].qty+=1; updateCartBar(); renderDrawer(); renderAllStockControls(); animateCart(); showToast(item.name+" adicionado ao pedido");
       });
       grid.appendChild(card);
     });
@@ -1638,7 +1765,11 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
       var item=cart[name], row=document.createElement("div"); row.className="drawer-item";
       row.innerHTML='<div><div class="drawer-item-name">'+name+'</div><div class="drawer-item-controls"><button type="button" data-act="minus" aria-label="Diminuir">−</button><strong>'+item.qty+'</strong><button type="button" data-act="plus" aria-label="Aumentar">+</button></div></div><div class="drawer-item-price">'+formatBRL(item.qty*item.price)+'</div>';
       row.querySelector('[data-act="minus"]').onclick=function(){item.qty--;if(item.qty<=0)delete cart[name];updateCartBar();renderDrawer();};
-      row.querySelector('[data-act="plus"]').onclick=function(){item.qty++;updateCartBar();renderDrawer();animateCart();};
+      row.querySelector('[data-act="plus"]').onclick=function(){
+        var available=getStock(name);
+        if(available !== null && item.qty >= available){showToast("Limite de estoque atingido: "+available);return;}
+        item.qty++;updateCartBar();renderDrawer();renderAllStockControls();animateCart();
+      };
       items.appendChild(row);
     });
     document.getElementById("drawerCount").textContent=totals.count+(totals.count===1?" item":" itens");
@@ -1683,10 +1814,42 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
     fields.forEach(function(pair){var el=document.getElementById(pair[1]);if(el&&el.value.trim())lines.push(pair[0]+": "+el.value.trim());});
     return lines.join("\n");
   }
-  function sendCheckout(){
+  async function sendCheckout(){
     if(getTotals().count===0)return;
-    var url="https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(buildCheckoutMessage());
-    window.location.href=url;
+    if(orderBeingReserved)return;
+    if(!supabaseClient){
+      showToast("Configure a Publishable key do Supabase no código.");
+      return;
+    }
+
+    orderBeingReserved=true;
+    var btn=document.getElementById("sendWhatsappBtn");
+    var original=btn?btn.textContent:"ENVIAR PEDIDO PELO WHATSAPP";
+    if(btn){btn.disabled=true;btn.textContent="CONFIRMANDO ESTOQUE...";}
+
+    try{
+      var payload=Object.keys(cart).map(function(name){
+        return {nome:name,quantidade:cart[name].qty};
+      });
+      var result=await supabaseClient.rpc("reservar_estoque",{p_itens:payload});
+      if(result.error)throw result.error;
+      var response=result.data;
+      if(typeof response === "string"){
+        try{response=JSON.parse(response);}catch(e){}
+      }
+      if(!response || response.ok !== true){
+        throw new Error(response && response.message ? response.message : "Não foi possível reservar o estoque.");
+      }
+
+      var url="https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(buildCheckoutMessage());
+      window.location.href=url;
+    }catch(err){
+      console.error("Erro ao reservar estoque:",err);
+      await loadStock(false);
+      showToast(err && err.message ? err.message : "Algum item ficou sem estoque. Atualizamos o cardápio.");
+      if(btn){btn.disabled=false;btn.textContent=original;}
+      orderBeingReserved=false;
+    }
   }
 
   function finishOrder(){
@@ -1792,6 +1955,16 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
     updateStoreStatus();
     setInterval(updateStoreStatus, 60000);
     initCarousel();
+
+    if(supabaseClient){
+      loadStock(true);
+      setInterval(function(){loadStock(false);},20000);
+      document.addEventListener("visibilitychange",function(){
+        if(!document.hidden)loadStock(false);
+      });
+    }else{
+      showToast("Configure a Publishable key do Supabase para ativar o estoque.");
+    }
   });
 })();
 </script>
