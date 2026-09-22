@@ -1389,8 +1389,10 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
   var stockLoading = false;
   var orderBeingReserved = false;
 
-  if (window.supabase && SUPABASE_PUBLISHABLE_KEY.indexOf("COLE_") !== 0) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  // O estoque usa a API REST do Supabase diretamente.
+  // Isso evita problemas de roteamento/RPC do cliente JS no GitHub Pages.
+  if (SUPABASE_PUBLISHABLE_KEY.indexOf("sb_publishable_") === 0) {
+    supabaseClient = true;
   }
 
   var WHATSAPP_NUMBER = "5579996631232";
@@ -1565,22 +1567,55 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
     if(changed) showToast("O estoque foi atualizado. Seu pedido foi ajustado.");
   }
 
+  async function supabaseRpc(functionName, body){
+    var endpoint = SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/rpc/" + encodeURIComponent(functionName);
+    var options = {
+      method: body === undefined ? "POST" : "POST",
+      headers: {
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      }
+    };
+    if(body !== undefined) options.body = JSON.stringify(body);
+
+    var response = await fetch(endpoint, options);
+    var text = await response.text();
+    var data = null;
+    try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
+
+    if(!response.ok){
+      var message = (data && data.message) || (data && data.error_description) || (data && data.hint) || text || ("HTTP " + response.status);
+      var error = new Error(message);
+      error.status = response.status;
+      error.endpoint = endpoint;
+      throw error;
+    }
+    return data;
+  }
+
   async function loadStock(showError){
-    if(!supabaseClient || stockLoading)return false;
+    if(!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY.indexOf("sb_publishable_") !== 0 || stockLoading)return false;
     stockLoading=true;
     try{
-      var result=await supabaseClient.rpc("obter_estoque");
-      if(result.error)throw result.error;
-      var rows=result.data || [];
+      var rows=await supabaseRpc("obter_estoque");
+      if(!Array.isArray(rows)) rows=[];
       stock={};
-      rows.forEach(function(item){stock[item.nome]=Number(item.estoque)||0;});
+      rows.forEach(function(item){
+        if(item && item.nome) stock[item.nome]=Number(item.estoque)||0;
+      });
       syncCartWithStock();
       renderAllStockControls();
+      renderFeatured();
       updateCartBar();
       return true;
     }catch(err){
       console.error("Erro ao carregar estoque:",err);
-      if(showError)showToast("Não foi possível atualizar o estoque.");
+      if(showError){
+        showToast("Não foi possível conectar ao estoque.");
+      }
+      renderAllStockControls();
       return false;
     }finally{
       stockLoading=false;
@@ -1831,9 +1866,7 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
       var payload=Object.keys(cart).map(function(name){
         return {nome:name,quantidade:cart[name].qty};
       });
-      var result=await supabaseClient.rpc("reservar_estoque",{p_itens:payload});
-      if(result.error)throw result.error;
-      var response=result.data;
+      var response=await supabaseRpc("reservar_estoque",{p_itens:payload});
       if(typeof response === "string"){
         try{response=JSON.parse(response);}catch(e){}
       }
