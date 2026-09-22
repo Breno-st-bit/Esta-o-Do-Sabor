@@ -1569,18 +1569,28 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
 
   async function supabaseRpc(functionName, body){
     var endpoint = SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/rpc/" + encodeURIComponent(functionName);
+    // Publishable keys novas (sb_publishable_...) devem ser enviadas
+    // no header `apikey`. Elas NÃO são JWTs e não devem ser usadas
+    // como `Authorization: Bearer ...`.
     var options = {
-      method: body === undefined ? "POST" : "POST",
+      method: "POST",
+      mode: "cors",
       headers: {
         "apikey": SUPABASE_PUBLISHABLE_KEY,
-        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY,
         "Content-Type": "application/json",
         "Accept": "application/json"
       }
     };
     if(body !== undefined) options.body = JSON.stringify(body);
 
-    var response = await fetch(endpoint, options);
+    var response;
+    try {
+      response = await fetch(endpoint, options);
+    } catch(networkError) {
+      networkError.endpoint = endpoint;
+      networkError.message = "Não foi possível acessar o Supabase. Verifique a URL do projeto, a conexão e as permissões da API.";
+      throw networkError;
+    }
     var text = await response.text();
     var data = null;
     try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
@@ -1611,11 +1621,19 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
       updateCartBar();
       return true;
     }catch(err){
-      console.error("Erro ao carregar estoque:",err);
+      console.error("Erro ao carregar estoque:",err, err && err.endpoint ? "Endpoint: " + err.endpoint : "");
+      // Não deixa o cardápio preso em "Verificando estoque...".
+      // Em caso de falha, mostramos uma mensagem de indisponibilidade.
+      document.querySelectorAll(".stock-info").forEach(function(info){
+        info.innerHTML = "";
+        var badge=document.createElement("span");
+        badge.className="stock-badge low";
+        badge.textContent="Estoque indisponível";
+        info.appendChild(badge);
+      });
       if(showError){
-        showToast("Não foi possível conectar ao estoque.");
+        showToast("Não foi possível conectar ao estoque. Atualize a página e tente novamente.");
       }
-      renderAllStockControls();
       return false;
     }finally{
       stockLoading=false;
