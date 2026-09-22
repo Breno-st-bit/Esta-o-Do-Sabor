@@ -1579,7 +1579,8 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
         "apikey": SUPABASE_PUBLISHABLE_KEY,
         "Content-Type": "application/json",
         "Accept": "application/json"
-      }
+      },
+      cache: "no-store"
     };
     if(body !== undefined) options.body = JSON.stringify(body);
 
@@ -1608,13 +1609,53 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
   async function loadStock(showError){
     if(!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY.indexOf("sb_publishable_") !== 0 || stockLoading)return false;
     stockLoading=true;
+
+    var endpoint = SUPABASE_URL.replace(/\/$/, "") +
+      "/rest/v1/produtos?select=nome,categoria,estoque,estoque_maximo,esgotado_em&ativo=eq.true&order=id.asc";
+
     try{
-      var rows=await supabaseRpc("obter_estoque");
+      var response = await fetch(endpoint, {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Accept": "application/json"
+        },
+        cache: "no-store"
+      });
+
+      var text = await response.text();
+      var rows = [];
+      try { rows = text ? JSON.parse(text) : []; } catch(e) { rows = []; }
+
+      if(!response.ok){
+        var message = (rows && rows.message) || (rows && rows.hint) || text || ("HTTP " + response.status);
+        var error = new Error(message);
+        error.status = response.status;
+        error.endpoint = endpoint;
+        throw error;
+      }
+
       if(!Array.isArray(rows)) rows=[];
+
+      // Reposição automática dos itens que já passaram de 10 horas.
+      // A função SQL continua sendo usada no checkout; aqui fazemos apenas
+      // a correção visual/local para que o cardápio não fique preso em 0.
+      var now = Date.now();
       stock={};
       rows.forEach(function(item){
-        if(item && item.nome) stock[item.nome]=Number(item.estoque)||0;
+        if(!item || !item.nome)return;
+        var value = Number(item.estoque)||0;
+        var max = Number(item.estoque_maximo)||10;
+        if(value <= 0 && item.esgotado_em){
+          var exhaustedAt = Date.parse(item.esgotado_em);
+          if(!isNaN(exhaustedAt) && now - exhaustedAt >= 10*60*60*1000){
+            value = max;
+          }
+        }
+        stock[item.nome]=value;
       });
+
       syncCartWithStock();
       renderAllStockControls();
       renderFeatured();
@@ -1622,8 +1663,6 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
       return true;
     }catch(err){
       console.error("Erro ao carregar estoque:",err, err && err.endpoint ? "Endpoint: " + err.endpoint : "");
-      // Não deixa o cardápio preso em "Verificando estoque...".
-      // Em caso de falha, mostramos uma mensagem de indisponibilidade.
       document.querySelectorAll(".stock-info").forEach(function(info){
         info.innerHTML = "";
         var badge=document.createElement("span");
@@ -1632,7 +1671,7 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
         info.appendChild(badge);
       });
       if(showError){
-        showToast("Não foi possível conectar ao estoque. Atualize a página e tente novamente.");
+        showToast("Não foi possível conectar ao estoque. Verifique o Supabase e atualize a página.");
       }
       return false;
     }finally{
@@ -1860,8 +1899,8 @@ button,a,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent
     Object.keys(cart).forEach(function(name){lines.push("• "+cart[name].qty+"x "+name+" — "+formatBRL(cart[name].qty*cart[name].price));});
     var t=getTotals(); lines.push("", "Total: "+formatBRL(t.total), "", "📍 ENTREGA");
     var fields=[
-      ["Nome","customerName"],["Telefone","customerPhone"],["Endereço","customerAddress"],
-      ["Número","customerNumber"],["Bairro","customerNeighborhood"],["Complemento","customerComplement"],
+      ["Nome","customerName"],["Endereço","customerAddress"],
+      ["Número","customerNumber"],["Complemento","customerComplement"],
       ["Pagamento","paymentMethod"],["Observação","orderNotes"]
     ];
     fields.forEach(function(pair){var el=document.getElementById(pair[1]);if(el&&el.value.trim())lines.push(pair[0]+": "+el.value.trim());});
